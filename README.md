@@ -1,1 +1,3 @@
-# SW_Arch_Assignment3
+language: Python
+Database: sqlite
+workflow: centralized
