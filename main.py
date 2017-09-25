@@ -55,7 +55,8 @@ def buildItem(dbConnection,name):
     item = Item(name,price,category,quantity,subcategories)
     return item
 
-def ShowCategories():
+#Shows and Selects Categories for User
+def ShowCategories(user):
     dbConnection = createDbConnection("assignment3.db")
     dbCursor = dbConnection.cursor()
     Ready2Checkout = 0
@@ -292,7 +293,7 @@ def ShowCategories():
                 print("Not Payable Amount")
                 ShowCategories()
             else:
-                Pay()
+                Pay(user)
             
         elif choice == "Quit":
             print("Logged Off")
@@ -302,13 +303,14 @@ def ShowCategories():
             print("Invalid input")
             ShowCategories()
 
-
+#Asks user for information
 def askUser():
     username = raw_input("Enter your Username: ")
     password = raw_input("Enter your Password: ")
     checkpass(username, password)
     return
 
+#Checks the username and password 
 def checkpass(user, pwd):
     dbConnection = createDbConnection("assignment3.db")
     dbCursor = dbConnection.cursor()
@@ -334,13 +336,13 @@ def checkpass(user, pwd):
        
 
         
-
+#Login and Calls ShowCategories
 def login(user):
     print("Welcome " + user)
     print("You have successfully login in!")
-    ShowCategories()
+    ShowCategories(user)
 
-
+#Asks user for payment
 def createPayment():
     card = raw_input("Enter 16 digit card number: ")
     if len(str(card)) != 16:
@@ -348,14 +350,44 @@ def createPayment():
         createPayment()
     else:
         return card
-
+    
+#Asks user for Address
 def createAddress():
     address = raw_input("Enter Address: ")
     return address
 
-def Pay():
-    card = createPayment()
-    address = createAddress()
+#Payment function after checkout
+def Pay(user):
+    dbConnection = createDbConnection("assignment3.db")
+    dbCursor = dbConnection.cursor()
+    checkCard = dbCursor.execute("SELECT card FROM account WHERE username = '"+user+"'")
+    checkAddress = dbCursor.execute("SELECT card FROM account WHERE username = '"+user+"'")
+    if (checkCard == None):
+        print("There is no credit card on this account.")
+        card = createPayment()
+       #Write to database
+    if (checkAddress == None):
+        print("There is no address on this account.")
+        address = createAddress()
+        #Write to database
+    else:
+        input1 = raw_input("Enter 1 to overwrite credit card\nEnter 2 to overwrite address\nEnter 3 to print current information.\nEnter 4 to continue checking out")
+        if input1 == "1":
+            print("Not done")
+            #Update
+        elif input1 == "2":
+            print("Not done")
+            #Update
+        elif input1 == "3":
+            print("Credit card: ")#checkCard
+            print("Address: ")#checkAddress)
+        elif input1 == "4":
+            #cart = 0
+            #subtract from total
+            print("You have successfully checked-out of our store!")
+            print("Thank you!")
+    
+    return
     
     
     
