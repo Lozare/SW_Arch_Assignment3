@@ -32,11 +32,14 @@ class ShoppingCart(object):
         self.items.update({itemname: quantity})
 
     def remove_item(self, itemname, price, quantity):
-        if itemname in self.items:
-            if quantity < self.items[itemname] and quantity > 0:
-                self.items[itemname].update -= quantity
-                self.total -= price*quantity
-                
-        if quantity >= self.items[itemname]:
-            self.total -= price*self.items[itemname]
+        if quantity == 0:
+            self.total -= price*float(self.items[itemname])
             del self.items[itemname]
+            
+        elif itemname in self.items:
+            self.total -= (price*float(self.items[itemname]))
+            self.items.update({itemname: float(quantity)})
+            self.total += (float(quantity) * price)
+             
+                
+        
