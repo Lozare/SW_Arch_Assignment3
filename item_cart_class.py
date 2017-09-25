@@ -21,21 +21,22 @@ class Item(object):
     def getSubcategories(self):
         return self.subcategories
 
-class ShoppingCart(object):      #shopping cart format:  {itemname:[price,quantity]}
+class ShoppingCart(object):      
     
     def __init__(self):
         self.total = 0
         self.items = {}
 
     def add_item(self, itemname, price, quantity):
-        self.total = (quantity * price)
+        self.total += (quantity * price)
         self.items.update({itemname: quantity})
 
-    def remove_item(self, itemname, quantity, price):
+    def remove_item(self, itemname, price, quantity):
         if itemname in self.items:
             if quantity < self.items[itemname] and quantity > 0:
-                self.items[itemname] -= quantity
+                self.items[itemname].update -= quantity
                 self.total -= price*quantity
-        elif quantity >= self.items[itemname]:
+                
+        if quantity >= self.items[itemname]:
             self.total -= price*self.items[itemname]
             del self.items[itemname]
