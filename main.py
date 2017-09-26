@@ -8,8 +8,8 @@ from sqlite3 import Error
 
 def editQuantityInInventoryDb(dbConnection,item,newQuantity):
     dbCursor = dbConnection.cursor()
-    dbCursor.execute("update inventory set numberInStock = '"+str(newQuantity)+
-                     "' where item = '"+item+"';")
+    dbCursor.execute("update inventory set numberInStock = '"+str(newQuantity)+"' where item = '"+item+"';")
+    dbConnection.commit()
     return
 
 def createDbConnection(dbFile):
@@ -291,7 +291,21 @@ def ShowCategories(user):
         elif choice == "checkout":
             print "Here is what we have in your cart:", mycart.items
             print ("Your total to be paid is: $%.2f" % round(mycart.total,2))
-            Ready2Checkout = 1
+            key_array = []
+            quant_array = []
+    
+            for key in mycart.items:
+                key_array.append(key)
+            for each in mycart.items:
+                quant_array.append(mycart.items[each])
+
+            i=0
+            for each in key_array:
+                dbCursor.execute("SELECT numberInStock FROM inventory WHERE item='"+each+"'")
+                raw_stock = dbCursor.fetchone()
+                newquant = raw_stock[0] - quant_array[i]
+                editQuantityInInventoryDb(dbConnection,each,newquant)
+                i+=1
             if(mycart.total == 0.00):
                 print("Not Payable Amount")
                 ShowCategories()
