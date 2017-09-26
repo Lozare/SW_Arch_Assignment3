@@ -1,8 +1,11 @@
 from item_cart_class import Item
 import item_cart_class
+import datetime
 from item_cart_class import ShoppingCart
 import sqlite3
 from sqlite3 import Error
+
+
 def editQuantityInInventoryDb(dbConnection,item,newQuantity):
     dbCursor = dbConnection.cursor()
     dbCursor.execute("update inventory set numberInStock = '"+str(newQuantity)+
@@ -320,12 +323,8 @@ def checkpass(user, pwd):
     if check[0] == user:
         password = dbCursor.execute("SELECT password FROM account WHERE username = '"+user+"'")
         password = dbCursor.fetchone()
-        try:
-            if(password[0] == pwd):
-                login(user)
-        except:
-            print("Your username and/or password is incorrect")
-            askUser()
+        if(password[0] == pwd):
+            login(user)
         else:
             print("Your username and/or password is incorrect")
             askUser()
@@ -358,36 +357,30 @@ def createAddress():
 
 #Payment function after checkout
 def Pay(user):
+    d = datetime.datetime.today()
     dbConnection = createDbConnection("assignment3.db")
     dbCursor = dbConnection.cursor()
-    checkCard = dbCursor.execute("SELECT card FROM account WHERE username = '"+user+"'")
-    checkAddress = dbCursor.execute("SELECT card FROM account WHERE username = '"+user+"'")
-    if (checkCard == None):
-        print("There is no credit card on this account.")
-        card = createPayment()
-       #Write to database
-    if (checkAddress == None):
-        print("There is no address on this account.")
-        address = createAddress()
-        #Write to database
-    else:
-        input1 = raw_input("Enter 1 to overwrite credit card\nEnter 2 to overwrite address\nEnter 3 to print current information.\nEnter 4 to continue checking out")
-        if input1 == "1":
-            print("Not done")
-            #Update
-        elif input1 == "2":
-            print("Not done")
-            #Update
-        elif input1 == "3":
-            print("Credit card: ")#checkCard
-            print("Address: ")#checkAddress)
-        elif input1 == "4":
-            #cart = 0
-            #subtract from total
-            print("You have successfully checked-out of our store!")
-            print("Thank you!")
-    
-    return
+    card = createPayment()
+    address = createAddress()
+    inputPay = 0
+    dbCursor.execute("DELETE FROM cart WHERE username = '"+user+"'")
+    mycart.total = 0
+    max1 = dbCursor.execute("SELECT max(orderNum) from orders")
+    max1 = dbCursor.fetchone()
+    x = max1[0] + 1
+    dbCursor.execute("UPDATE orders SET orderNum = " + str(x) + " WHERE username = '"+user+"'")
+    dbConnection.commit()
+    dbCursor.execute("UPDATE orders SET shippingAddress = '" + str(address) + "' WHERE username = '"+user+"'")
+    dbConnection.commit()
+    dbCursor.execute("UPDATE orders SET paymentMethod = "+ str(card)+ " WHERE username = '"+user+"'")
+    dbConnection.commit()
+    dbCursor.execute("UPDATE orders SET purchaseDate = "+str(d.strftime("%x"))+ " WHERE username = '"+user+"'")
+    dbConnection.commit()
+    dbCursor.execute("UPDATE orders SET shippingDate = "+str(d.strftime("%x"))+" WHERE username = '"+user+"'")
+    dbConnection.commit()
+    print("You have successfully checked-out of our store!")
+    print("Thank you!")
+    ShowCategories(user)
     
     
     
