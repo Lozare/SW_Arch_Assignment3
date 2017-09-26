@@ -8,8 +8,8 @@ from sqlite3 import Error
 
 def editQuantityInInventoryDb(dbConnection,item,newQuantity):
     dbCursor = dbConnection.cursor()
-    dbCursor.execute("update inventory set numberInStock = '"+str(newQuantity)+"' where item = '"+item+"';")
-    dbConnection.commit()
+    dbCursor.execute("update inventory set numberInStock = '"+str(newQuantity)+
+                     "' where item = '"+item+"';")
     return
 
 def createDbConnection(dbFile):
@@ -66,7 +66,7 @@ def ShowCategories(user):
     global mycart
     mycart = ShoppingCart()
     while Ready2Checkout == 0:
-        print "1 - household items\n2 - books\n3 - toys\n4 - small electronics\n5 - clothes\ntotal - show cart total\ncartitems - view items and quantities in cart\nremove - remove item from cart\ncheckout - checkout and pay\nQuit - Log out"
+        print "1 - household items\n2 - books\n3 - toys\n4 - small electronics\n5 - clothes\ntotal - show cart total\ncartitems - view items and quantities in cart\nremove - remove item from cart\ncheckout - checkout and pay\norderh - Order History\nQuit - Log out"
         choice = raw_input("Enter the number or keyword for your choice: ")
 
         if choice == "1":
@@ -291,22 +291,7 @@ def ShowCategories(user):
         elif choice == "checkout":
             print "Here is what we have in your cart:", mycart.items
             print ("Your total to be paid is: $%.2f" % round(mycart.total,2))
-            key_array = []
-            quant_array = []
-    
-            for key in mycart.items:
-                key_array.append(key)
-            for each in mycart.items:
-                quant_array.append(mycart.items[each])
-
-            i=0
-            for each in key_array:
-                dbCursor.execute("SELECT numberInStock FROM inventory WHERE item='"+each+"'")
-                raw_stock = dbCursor.fetchone()
-                newquant = raw_stock[0] - quant_array[i]
-                editQuantityInInventoryDb(dbConnection,each,newquant)
-                i+=1
-                
+            Ready2Checkout = 1
             if(mycart.total == 0.00):
                 print("Not Payable Amount")
                 ShowCategories()
@@ -316,10 +301,13 @@ def ShowCategories(user):
         elif choice == "Quit":
             print("Logged Off")
             askUser()
+
+        elif choice == "orderh":
+            orderHistory(user)
             
         else:
             print("Invalid input")
-            ShowCategories()
+            ShowCategories(user)
 
 #Asks user for information
 def askUser():
@@ -396,6 +384,15 @@ def Pay(user):
     print("You have successfully checked-out of our store!")
     print("Thank you!")
     ShowCategories(user)
+
+#prints order history for User
+def orderHistory(user):
+    dbConnection = createDbConnection("assignment3.db")
+    dbCursor = dbConnection.cursor()
+    dbCursor.execute("SELECT * FROM orders WHERE username = '"+user+"' ORDER BY orderNum DESC")
+    print(dbCursor.fetchall())
+    ShowCategories(user)
+    
     
     
     
